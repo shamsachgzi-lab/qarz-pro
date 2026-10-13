@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ps" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#166534">
+<title>Qarz Pro — د قرضونو حساب</title>
+<style>
+:root{--green:#166534;--green2:#15803d;--bg:#f3f6f4;--card:#fff;--text:#17211b;--muted:#66736b;--line:#dce5df;--red:#b91c1c;--amber:#92400e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{background:var(--green);color:white;padding:18px 16px 20px;border-radius:0 0 22px 22px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-size:22px;font-weight:800}.sub{font-size:13px;opacity:.88;margin-top:3px}
+button,select,input,textarea{font:inherit}button{border:0;border-radius:12px;padding:11px 13px;cursor:pointer;font-weight:650}
+.lang{background:#ffffff20;color:white;border:1px solid #ffffff60;padding:8px 10px}
+main{max-width:780px;margin:auto;padding:14px 13px 34px}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:-3px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 2px 8px #10201508}.stat small{color:var(--muted);display:block;font-size:13px}.stat strong{font-size:21px;display:block;margin-top:7px;overflow-wrap:anywhere}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.primary{background:var(--green);color:white}.secondary{background:#e3eee7;color:var(--green)}.danger{background:#fee2e2;color:#991b1b}.neutral{background:#edf0ee;color:#29342d}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;margin:12px 0}.panel h2{font-size:17px;margin:0 0 12px}
+input,select,textarea{width:100%;border:1px solid #cbd6ce;border-radius:10px;padding:11px;background:white;color:var(--text);min-width:0}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 5px}.field{margin-bottom:11px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.search{margin-bottom:10px}
+.person{border:1px solid var(--line);border-radius:14px;padding:13px;margin:9px 0;background:#fff}.personhead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.person h3{margin:0 0 5px;font-size:16px}.muted{color:var(--muted);font-size:13px}.balance{font-weight:800;color:var(--green);font-size:18px;white-space:nowrap}.overdue{color:var(--red)}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.actions button{font-size:13px;padding:9px 10px}.pill{font-size:12px;border-radius:999px;padding:4px 8px;background:#fef3c7;color:#92400e;display:inline-block;margin-top:6px}.pill.ok{background:#dcfce7;color:#166534}
+.hidden{display:none!important}.empty{text-align:center;padding:24px 8px;color:var(--muted)}.historyrow{padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.historyrow:last-child{border-bottom:0}.smallbtn{padding:7px 9px;font-size:12px}.notice{font-size:12px;color:var(--muted);line-height:1.6}.foot{font-size:12px;text-align:center;color:var(--muted);padding:18px 5px}
+@media(max-width:430px){.two{grid-template-columns:1fr}.stat strong{font-size:18px}.brand{font-size:20px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="top">
+  <div><div class="brand">Qarz Pro</div><div class="sub" id="subtitle">د قرضدارانو حساب او یادونې</div></div>
+  <button class="lang" id="langBtn" onclick="toggleLang()">دري / فارسی</button>
+ </div>
+</header>
+<main>
+ <section class="stats">
+  <div class="stat"><small id="labTotal">ټول پاتې قرضونه</small><strong id="totalDebt">0 AFN</strong></div>
+  <div class="stat"><small id="labPeople">ټول قرضداران</small><strong id="peopleCount">0</strong></div>
+  <div class="stat"><small id="labPaid">ټولې ترلاسه شوې پیسې</small><strong id="totalPaid">0 AFN</strong></div>
+  <div class="stat"><small id="labDue">د نېټې تېر شوي قرضونه</small><strong id="overdueCount">0</strong></div>
+ </section>
+ <div class="toolbar">
+  <button class="primary" onclick="showAdd()" id="addBtn">＋ نوی قرضدار</button>
+  <button class="secondary" onclick="showReminders()" id="remBtn">▣ د ورکړې یادونې</button>
+  <button class="secondary" onclick="exportBackup()" id="backupBtn">Backup</button>
+  <button class="secondary" onclick="document.getElementById('restoreFile').click()" id="restoreBtn">Restore</button>
+  <input type="file" id="restoreFile" accept="application/json,.json" class="hidden" onchange="restoreBackup(event)">
+ </div>
+ <section id="addPanel" class="panel hidden">
+  <h2 id="formTitle">نوی قرضدار ثبت کړه</h2>
+  <div class="two">
+   <div class="field"><label id="nameLab">نوم *</label><input id="fName" autocomplete="name" placeholder="د قرضدار نوم"></div>
+   <div class="field"><label id="fatherLab">د پلار نوم</label><input id="fFather" placeholder="اختیاري"></div>
+  </div>
+  <div class="two">
+   <div class="field"><label id="phoneLab">د ټیلیفون شمېره</label><input id="fPhone" type="tel" inputmode="tel" placeholder="+93..."></div>
+   <div class="field"><label id="amountLab">اصلي قرض (AFN) *</label><input id="fAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>
+  </div>
+  <div class="two">
+   <div class="field"><label id="dateLab">د قرض نېټه</label><input id="fDate" type="date"></div>
+   <div class="field"><label id="dueLab">د پیسو ورکولو نېټه</label><input id="fDue" type="date"></div>
+  </div>
+  <div class="field"><label id="noteLab">یادښت / د مال تفصیل</label><textarea id="fNote" rows="2" placeholder="اختیاري"></textarea></div>
+  <div class="toolbar"><button class="primary" onclick="savePerson()" id="saveBtn">حساب ثبت کړه</button><button class="neutral" onclick="hideAdd()" id="cancelBtn">لغوه</button></div>
+  <div class="notice" id="formNotice">معلومات په همدې آیفون کې ساتل کېږي. د موبایل د بدلولو لپاره Backup فایل خوندي کړه.</div>
+ </section>
+ <section id="paymentPanel" class="panel hidden">
+  <h2 id="paymentTitle">د پیسو ورکړه ثبت کړه</h2>
+  <div class="field"><label id="payAmountLab">ورکړل شوې پیسې (AFN)</label><input id="payAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>
+  <div class="field"><label id="payDateLab">د ورکړې نېټه</label><input id="payDate" type="date"></div>
+  <div class="field"><label id="payNoteLab">یادښت</label><input id="payNote" placeholder="نغدې پیسې، حواله..."></div>
+  <div class="toolbar"><button class="primary" onclick="savePayment()" id="paySaveBtn">ورکړه ثبت کړه</button><button class="neutral" onclick="hidePayment()" id="payCancelBtn">لغوه</button></div>
+ </section>
+ <section id="reminderPanel" class="panel hidden"><h2 id="remTitle">د ورکړې یادونې</h2><div id="reminderList"></div><p class="notice" id="remNotice">دا لېست د اپلیکیشن دننه یادونه ده. په دې نسخه کې د نېټې خبرتیا هغه وخت ښکاري چې اپلیکیشن خلاص کړې؛ د آیفون سیسټمي خبرتیاوې تضمین نه دي.</p></section>
+ <section class="panel">
+  <h2 id="listTitle">د قرضدارانو لېست</h2>
+  <input class="search" id="search" placeholder="د نوم یا شمېره له مخې لټون..." oninput="renderPeople()">
+  <div class="two" style="margin-bottom:10px">
+   <div><label id="filterLab">د لېست ډول</label><select id="filter" onchange="renderPeople()"><option value="all" id="filterAll">ټول قرضداران</option><option value="due" id="filterDue">د نېټې تېر شوي</option><option value="open" id="filterOpen">پاتې قرض لرونکي</option><option value="paid" id="filterPaid">بشپړ تصفیه شوي</option></select></div>
+   <div><label id="sortLab">ترتیب</label><select id="sort" onchange="renderPeople()"><option value="debt" id="sortDebt">د زیات قرض له مخې</option><option value="name" id="sortName">د نوم له مخې</option><option value="date" id="sortDate">د نېټې له مخې</option></select></div>
+  </div>
+  <div id="peopleList"></div>
+ </section>
+ <section id="detailPanel" class="panel hidden">
+  <div class="top" style="margin-bottom:12px"><h2 id="detailTitle" style="margin:0">د قرضدار حساب</h2><button class="neutral smallbtn" onclick="closeDetail()" id="closeDetailBtn">بند</button></div>
+  <div id="detailBody"></div>
+ </section>
+ <section class="panel">
+  <h2 id="dataTitle">د معلوماتو خوندي ساتل</h2>
+  <p class="notice" id="dataNotice">Backup یو JSON فایل جوړوي چې ستا د قرضدارانو معلومات پکې وي. فایل په خوندي ځای کې وساته او له نورو سره یې مه شریکوه. Restore اوسني معلومات بدلولای شي؛ لومړی Backup واخله.</p>
+  <div class="toolbar"><button class="secondary" onclick="exportBackup()" id="backupBtn2">Backup فایل جوړ کړه</button><button class="danger" onclick="clearAll()" id="clearBtn">ټول معلومات پاک کړه</button></div>
+ </section>
+ <div class="foot" id="footer">Qarz Pro • معلومات په همدې وسیله کې ساتل کېږي؛ دا نسخه حساب آنلاین سرور ته نه لېږي.</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let people=[], editingId=null, paymentId=null, detailId=null, lang='ps';
+const today=()=>new Date().toISOString().slice(0,10);
+const fmt=n=>new Intl.NumberFormat(lang==='ps'?'ps-AF':'fa-AF',{maximumFractionDigits:2}).format(Number(n)||0)+' AFN';
+const tr={
+ ps:{subtitle:'د قرضدارانو حساب او یادونې',total:'ټول پاتې قرضونه',people:'ټول قرضداران',paid:'ټولې ترلاسه شوې پیسې',due:'د نېټې تېر شوي قرضونه',add:'＋ نوی قرضدار',rem:'▣ د ورکړې یادونې',formNew:'نوی قرضدار ثبت کړه',formEdit:'د قرضدار معلومات بدل کړه',name:'نوم *',father:'د پلار نوم',phone:'د ټیلیفون شمېره',amount:'اصلي قرض (AFN) *',date:'د قرض نېټه',dueDate:'د پیسو ورکولو نېټه',note:'یادښت / د مال تفصیل',save:'حساب ثبت کړه',cancel:'لغوه',notice:'معلومات په همدې آیفون کې ساتل کېږي. د موبایل د بدلولو لپاره Backup فایل خوندي کړه.',payTitle:'د پیسو ورکړه ثبت کړه',payAmount:'ورکړل شوې پیسې (AFN)',payDate:'د ورکړې نېټه',payNote:'یادښت',paySave:'ورکړه ثبت کړه',list:'د قرضدارانو لېست',search:'د نوم یا شمېره له مخې لټون...',filter:'د لېست ډول',all:'ټول قرضداران',overdue:'د نېټې تېر شوي',open:'پاتې قرض لرونکي',paidFilter:'بشپړ تصفیه شوي',sort:'ترتیب',sortDebt:'د زیات قرض له مخې',sortName:'د نوم له مخې',sortDate:'د نېټې له مخې',detail:'د قرضدار حساب',close:'بند',data:'د معلوماتو خوندي ساتل',dataNotice:'Backup یو JSON فایل جوړوي چې ستا د قرضدارانو معلومات پکې وي. فایل په خوندي ځای کې وساته او له نورو سره یې مه شریکوه. Restore اوسني معلومات بدلولای شي؛ لومړی Backup واخله.',backup:'Backup فایل جوړ کړه',clear:'ټول معلومات پاک کړه',footer:'Qarz Pro • معلومات په همدې وسیله کې ساتل کېږي؛ دا نسخه حساب آنلاین سرور ته نه لېږي.',noPeople:'قرضدار نه دی ثبت شوی.',remaining:'پاتې قرض',original:'اصلي قرض',received:'ترلاسه شوي',dueLabel:'د ورکړې نېټه',noDue:'نېټه نه ده ټاکل شوې',call:'زنګ',payment:'پیسې ترلاسه کړه',edit:'بدلون',history:'د حساب تاریخچه',del:'حذف',noPhone:'د دې قرضدار د ټیلیفون شمېره نشته.',invalid:'مهرباني وکړه نوم او د قرض اندازه سمه ولیکه.',saved:'حساب ثبت شو.',confirmDel:'دا قرضدار او تاریخچه یې پاکېږي. ډاډه یې؟',confirmClear:'ټول قرضداران او حسابونه د تل لپاره پاک شي؟ لومړی Backup واخله.',zero:'قرض اندازه باید له صفره زیاته وي.',payInvalid:'د ورکړې اندازه سمه ولیکه.',payTooMuch:'ورکړه د پاتې قرض څخه زیاته ده.',paySuccess:'د پیسو ورکړه ثبت شوه.',exported:'Backup فایل جوړ شو.',restoreConfirm:'Backup به اوسني معلومات بدل کړي. دوام ورکړو؟',restored:'Backup بېرته واخیستل شو.',badFile:'دا Backup فایل نه ښکاري یا خراب دی.',remEmpty:'اوس د یادونې لپاره قرضدار نشته.',late:'نېټه تېره شوې',todayDue:'نن د ورکړې نېټه ده',upcoming:'راتلونکی موعد',added:'ثبت شوی',paymentEntry:'د پیسو ورکړه',opening:'اصلي قرض',balance:'پاتې',phoneLabel:'شمېره',noteLabel:'یادښت',deletePayment:'دا ورکړه حذف شي؟',allPaid:'بشپړ تصفیه',notDue:'نېټه لا نه ده تېره'},
+ fa:{subtitle:'حساب قرضداران و یادآوری‌ها',total:'مجموع باقی قرض‌ها',people:'تعداد قرضداران',paid:'مجموع پول دریافت‌شده',due:'قرض‌های سررسید گذشته',add:'＋ قرضدار جدید',rem:'▣ یادآوری پرداخت',formNew:'ثبت قرضدار جدید',formEdit:'ویرایش معلومات قرضدار',name:'نام *',father:'نام پدر',phone:'شماره تلفن',amount:'قرض اصلی (AFN) *',date:'تاریخ قرض',dueDate:'تاریخ پرداخت',note:'یادداشت / شرح جنس',save:'ثبت حساب',cancel:'لغو',notice:'معلومات در همین آیفون ذخیره می‌شود. برای تغییر موبایل، فایل Backup را نگه دارید.',payTitle:'ثبت پرداخت پول',payAmount:'مبلغ پرداخت‌شده (AFN)',payDate:'تاریخ پرداخت',payNote:'یادداشت',paySave:'ثبت پرداخت',list:'فهرست قرضداران',search:'جستجو با نام یا شماره...',filter:'نوع فهرست',all:'همه قرضداران',overdue:'سررسید گذشته',open:'دارای قرض باقی‌مانده',paidFilter:'تصفیه‌شده',sort:'ترتیب',sortDebt:'بیشترین قرض',sortName:'بر اساس نام',sortDate:'بر اساس تاریخ',detail:'حساب قرضدار',close:'بستن',data:'حفاظت معلومات',dataNotice:'Backup یک فایل JSON شامل معلومات قرضداران می‌سازد. آن را در جای امن نگه دارید و شریک نسازید. Restore ممکن است معلومات فعلی را جایگزین کند؛ نخست Backup بگیرید.',backup:'ساخت فایل Backup',clear:'پاک‌کردن تمام معلومات',footer:'Qarz Pro • معلومات در همین دستگاه ذخیره می‌شود؛ این نسخه حساب را به سرور آنلاین نمی‌فرستد.',noPeople:'قرضداری ثبت نشده است.',remaining:'قرض باقی‌مانده',original:'قرض اصلی',received:'دریافت‌شده',dueLabel:'تاریخ پرداخت',noDue:'تاریخ تعیین نشده',call:'تماس',payment:'دریافت پول',edit:'ویرایش',history:'تاریخچه حساب',del:'حذف',noPhone:'شماره تلفن این قرضدار ثبت نیست.',invalid:'لطفاً نام و مبلغ قرض را درست وارد کنید.',saved:'حساب ثبت شد.',confirmDel:'این قرضدار و تاریخچه‌اش حذف شود؟',confirmClear:'تمام قرضداران و حساب‌ها برای همیشه حذف شوند؟ نخست Backup بگیرید.',zero:'مبلغ قرض باید بیشتر از صفر باشد.',payInvalid:'مبلغ پرداخت را درست وارد کنید.',payTooMuch:'پرداخت از قرض باقی‌مانده بیشتر است.',paySuccess:'پرداخت ثبت شد.',exported:'فایل Backup ساخته شد.',restoreConfirm:'Backup معلومات فعلی را جایگزین می‌کند. ادامه؟',restored:'Backup بازیابی شد.',badFile:'این فایل Backup معتبر نیست یا خراب است.',remEmpty:'فعلاً قرضداری برای یادآوری نیست.',late:'سررسید گذشته',todayDue:'موعد پرداخت امروز است',upcoming:'موعد آینده',added:'ثبت‌شده',paymentEntry:'پرداخت',opening:'قرض اصلی',balance:'باقی',phoneLabel:'شماره',noteLabel:'یادداشت',deletePayment:'این پرداخت حذف شود؟',allPaid:'تصفیه‌شده',notDue:'تاریخ هنوز نگذشته'}
+};
+function T(k){return tr[lang][k]||k}
+function persist(){try{localStorage.setItem('qarzpro_data_v1',JSON.stringify(people));}catch(e){alert('ذخیره نشد. حافظه مرورگر ممکن است پر باشد. Backup بگیرید.');}}
+function load(){try{people=JSON.parse(localStorage.getItem('qarzpro_data_v1')||'[]');if(!Array.isArray(people))people=[];}catch(e){people=[]}}
+function toggleLang(){lang=lang==='ps'?'fa':'ps';document.documentElement.lang=lang==='ps'?'ps':'fa';document.documentElement.dir='rtl';renderLang();renderAll()}
+function renderLang(){
+const map={subtitle:'subtitle',labTotal:'total',labPeople:'people',labPaid:'paid',labDue:'due',addBtn:'add',remBtn:'rem',formTitle:editingId?'formEdit':'formNew',nameLab:'name',fatherLab:'father',phoneLab:'phone',amountLab:'amount',dateLab:'date',dueLab:'dueDate',noteLab:'note',saveBtn:'save',cancelBtn:'cancel',formNotice:'notice',paymentTitle:'payTitle',payAmountLab:'payAmount',payDateLab:'payDate',payNoteLab:'payNote',paySaveBtn:'paySave',payCancelBtn:'cancel',listTitle:'list',filterLab:'filter',filterAll:'all',filterDue:'overdue',filterOpen:'open',filterPaid:'paidFilter',sortLab:'sort',sortDebt:'sortDebt',sortName:'sortName',sortDate:'sortDate',detailTitle:'detail',closeDetailBtn:'close',dataTitle:'data',dataNotice:'dataNotice',backupBtn2:'backup',clearBtn:'clear',footer:'footer'};
+Object.entries(map).forEach(([id,k])=>{if($(id))$(id).textContent=T(k)});
+$('langBtn').textContent=lang==='ps'?'دري / فارسی':'پښتو';
+$('search').placeholder=T('search');$('fName').placeholder=T('name').replace(' *','');$('fFather').placeholder=lang==='ps'?'اختیاري':'اختیاری';$('fPhone').placeholder='+93...';$('fAmount').placeholder='0';$('fNote').placeholder=lang==='ps'?'اختیاري':'اختیاری';$('payNote').placeholder=lang==='ps'?'نغدې پیسې، حواله...':'نقد، حواله...';
+$('filter').querySelectorAll('option').forEach(o=>{let k={all:'all',due:'overdue',open:'open',paid:'paidFilter'}[o.value];if(k)o.textContent=T(k)});
+$('sort').querySelectorAll('option').forEach(o=>{let k={debt:'sortDebt',name:'sortName',date:'sortDate'}[o.value];if(k)o.textContent=T(k)});
+}
+function showAdd(id=null){editingId=id;const p=id?people.find(x=>x.id===id):null;$('addPanel').classList.remove('hidden');$('paymentPanel').classList.add('hidden');$('formTitle').textContent=T(id?'formEdit':'formNew');$('fName').value=p?.name||'';$('fFather').value=p?.father||'';$('fPhone').value=p?.phone||'';$('fAmount').value=p?p.original:'';$('fDate').value=p?.date||today();$('fDue').value=p?.due||'';$('fNote').value=p?.note||'';$('saveBtn').textContent=T('save');window.scrollTo({top:$('addPanel').offsetTop-10,behavior:'smooth'});}
+function hideAdd(){$('addPanel').classList.add('hidden');editingId=null}
+function savePerson(){let name=$('fName').value.trim(),amount=Number($('fAmount').value);if(!name||!Number.isFinite(amount)||amount<=0){alert(T('invalid'));return}let data={name,father:$('fFather').value.trim(),phone:$('fPhone').value.trim(),original:amount,date:$('fDate').value||today(),due:$('fDue').value,note:$('fNote').value.trim()};if(editingId){let p=people.find(x=>x.id===editingId);if(!p)return;let alreadyPaid=(p.payments||[]).reduce((s,a)=>s+Number(a.amount),0);if(amount<alreadyPaid){alert(T('payTooMuch'));return}Object.assign(p,data)}else{people.push({...data,id:String(Date.now())+Math.random().toString(16).slice(2),payments:[],created:new Date().toISOString()})}persist();hideAdd();renderAll();alert(T('saved'))}
+function remaining(p){return Math.max(0,Number(p.original||0)-(p.payments||[]).reduce((s,a)=>s+Number(a.amount||0),0))}
+function isOverdue(p){return remaining(p)>0&&p.due&&p.due<today()}
+function showPayment(id){paymentId=id;$('paymentPanel').classList.remove('hidden');$('addPanel').classList.add('hidden');$('payAmount').value='';$('payDate').value=today();$('payNote').value='';let p=people.find(x=>x.id===id);$('paymentTitle').textContent=T('payment')+' — '+p.name;window.scrollTo({top:$('paymentPanel').offsetTop-10,behavior:'smooth'})}
+function hidePayment(){$('paymentPanel').classList.add('hidden');paymentId=null}
+function savePayment(){let p=people.find(x=>x.id===paymentId),a=Number($('payAmount').value);if(!p||!Number.isFinite(a)||a<=0){alert(T('payInvalid'));return}if(a>remaining(p)+0.0001){alert(T('payTooMuch'));return}p.payments=p.payments||[];p.payments.push({id:String(Date.now()),amount:a,date:$('payDate').value||today(),note:$('payNote').value.trim()});persist();hidePayment();renderAll();if(detailId===p.id)showDetail(p.id);alert(T('paySuccess'))}
+function renderAll(){renderStats();renderPeople();if(!$('reminderPanel').classList.contains('hidden'))renderReminders();if(detailId)renderDetail()}
+function renderStats(){let rem=people.reduce((s,p)=>s+remaining(p),0),paid=people.reduce((s,p)=>s+(p.payments||[]).reduce((z,a)=>z+Number(a.amount||0),0),0);$('totalDebt').textContent=fmt(rem);$('peopleCount').textContent=people.length;$('totalPaid').textContent=fmt(paid);$('overdueCount').textContent=people.filter(isOverdue).length}
+function renderPeople(){let q=$('search').value.trim().toLocaleLowerCase(),f=$('filter').value,sort=$('sort').value;let arr=people.filter(p=>(p.name+' '+p.father+' '+p.phone).toLocaleLowerCase().includes(q));if(f==='due')arr=arr.filter(isOverdue);if(f==='open')arr=arr.filter(p=>remaining(p)>0);if(f==='paid')arr=arr.filter(p=>remaining(p)<=0);arr.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='date'?(a.due||'9999').localeCompare(b.due||'9999'):remaining(b)-remaining(a));let root=$('peopleList');root.innerHTML='';if(!arr.length){root.innerHTML='<div class="empty">'+T('noPeople')+'</div>';return}arr.forEach(p=>{let d=document.createElement('div');d.className='person';let status=isOverdue(p)?'<span class="pill">'+T('late')+'</span>':remaining(p)<=0?'<span class="pill ok">'+T('allPaid')+'</span>':'';d.innerHTML=`<div class="personhead"><div style="min-width:0"><h3></h3><div class="muted"></div>${status}</div><div class="balance"></div></div><div class="muted" style="margin-top:8px"></div><div class="actions"></div>`;d.querySelector('h3').textContent=p.name;d.querySelector('.personhead .muted').textContent=[p.father,p.phone].filter(Boolean).join(' • ')||'—';d.querySelector('.balance').textContent=fmt(remaining(p));d.querySelectorAll('.muted')[1].textContent=T('dueLabel')+': '+(p.due||T('noDue'));let acts=d.querySelector('.actions');let detail=btn(T('history'),'secondary',()=>showDetail(p.id));acts.append(detail);acts.append(btn(T('payment'),'primary',()=>showPayment(p.id)));acts.append(btn(T('edit'),'secondary',()=>showAdd(p.id)));acts.append(btn(T('call'),'secondary',()=>callPerson(p)));root.append(d)})}
+function btn(label,cls,fn){let b=document.createElement('button');b.textContent=label;b.className=cls;b.onclick=fn;return b}
+function callPerson(p){if(!p.phone){alert(T('noPhone'));return}location.href='tel:'+p.phone.replace(/[^\d+]/g,'')}
+function showDetail(id){detailId=id;$('detailPanel').classList.remove('hidden');renderDetail();window.scrollTo({top:$('detailPanel').offsetTop-10,behavior:'smooth'})}
+function closeDetail(){detailId=null;$('detailPanel').classList.add('hidden')}
+function renderDetail(){let p=people.find(x=>x.id===detailId);if(!p){closeDetail();return}$('detailTitle').textContent=p.name;let root=$('detailBody');root.innerHTML='';let info=document.createElement('div');info.innerHTML=`<div class="two"><div class="stat"><small>${T('original')}</small><strong>${fmt(p.original)}</strong></div><div class="stat"><small>${T('remaining')}</small><strong>${fmt(remaining(p))}</strong></div></div><p class="muted">${T('father')}: ${escapeHtml(p.father||'—')}<br>${T('phoneLabel')}: ${escapeHtml(p.phone||'—')}<br>${T('date')}: ${escapeHtml(p.date||'—')}<br>${T('dueLabel')}: ${escapeHtml(p.due||T('noDue'))}<br>${T('noteLabel')}: ${escapeHtml(p.note||'—')}</p><div class="actions"></div><h3 style="font-size:15px;margin-top:18px">${T('history')}</h3>`;root.append(info);let a=info.querySelector('.actions');a.append(btn(T('call'),'secondary',()=>callPerson(p)));a.append(btn(T('payment'),'primary',()=>showPayment(p.id)));a.append(btn(T('edit'),'secondary',()=>showAdd(p.id)));a.append(btn(T('del'),'danger',()=>deletePerson(p.id)));let entries=[{date:p.date||'',amount:Number(p.original),note:T('opening'),type:'opening'},...(p.payments||[]).map(x=>({...x,type:'payment'}))].sort((x,y)=>(x.date||'').localeCompare(y.date||''));entries.forEach(e=>{let row=document.createElement('div');row.className='historyrow';let left=document.createElement('div');left.innerHTML=`<strong>${e.type==='opening'?T('opening'):T('paymentEntry')}</strong><div class="muted">${escapeHtml(e.date||'')} ${e.note? ' • '+escapeHtml(e.note):''}</div>`;let right=document.createElement('div');right.style.fontWeight='750';right.textContent=(e.type==='opening'?'+':'−')+fmt(e.amount);row.append(left,right);root.append(row);if(e.type==='payment'){let del=btn('×','danger smallbtn',()=>deletePayment(p.id,e.id));del.style.marginTop='-2px';row.append(del)}})}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function deletePerson(id){if(!confirm(T('confirmDel')))return;people=people.filter(p=>p.id!==id);persist();closeDetail();renderAll()}
+function deletePayment(pid,paid){if(!confirm(T('deletePayment')))return;let p=people.find(x=>x.id===pid);if(!p)return;p.payments=(p.payments||[]).filter(x=>x.id!==paid);persist();renderAll();renderDetail()}
+function showReminders(){$('reminderPanel').classList.toggle('hidden');if(!$('reminderPanel').classList.contains('hidden'))renderReminders();window.scrollTo({top:$('reminderPanel').offsetTop-10,behavior:'smooth'})}
+function renderReminders(){let arr=people.filter(p=>remaining(p)>0&&p.due).sort((a,b)=>a.due.localeCompare(b.due));let root=$('reminderList');root.innerHTML='';if(!arr.length){root.innerHTML='<div class="empty">'+T('remEmpty')+'</div>';return}arr.forEach(p=>{let state=p.due<today()?T('late'):p.due===today()?T('todayDue'):T('upcoming');let row=document.createElement('div');row.className='historyrow';let l=document.createElement('div');l.innerHTML='<strong></strong><div class="muted"></div>';l.querySelector('strong').textContent=p.name;l.querySelector('.muted').textContent=p.due+' • '+state;let r=document.createElement('div');r.style.textAlign='left';r.innerHTML='<strong></strong><div></div>';r.querySelector('strong').textContent=fmt(remaining(p));r.querySelector('div').append(btn(T('history'),'secondary smallbtn',()=>showDetail(p.id)));row.append(l,r);root.append(row)})}
+function exportBackup(){let blob=new Blob([JSON.stringify({app:'Qarz Pro',version:1,exportedAt:new Date().toISOString(),people},null,2)],{type:'application/json'});let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Qarz-Pro-Backup-'+today()+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);alert(T('exported'))}
+function restoreBackup(e){let file=e.target.files[0];if(!file)return;if(!confirm(T('restoreConfirm'))){e.target.value='';return}let r=new FileReader();r.onload=()=>{try{let data=JSON.parse(r.result);let arr=Array.isArray(data)?data:data.people;if(!Array.isArray(arr)||arr.some(p=>!p||!p.id||typeof p.name!=='string'))throw Error('bad');people=arr;persist();renderAll();alert(T('restored'))}catch(err){alert(T('badFile'))}e.target.value=''};r.readAsText(file)}
+function clearAll(){if(!confirm(T('confirmClear')))return;people=[];persist();closeDetail();renderAll()}
+load();renderLang();renderAll();
+</script>
+</body>
+</html>
